@@ -237,16 +237,29 @@ const getTodos = () => {
         $('#todo-list').append(`
         <ul style="background: #aaaaaa; padding: 10px; border-radius: 10px; box-shadow: 0px 0px 10px 0px #bababa; list-style: none;">
           <li>
-            <div>
-              <small class="font-weight-bold" style="color: #dddddd"">Todo ${todo.id}</small>
-              <p style="text-decoration: line-through; color: #dddddd">
-                Title: ${todo.title} <br>
-                Description: ${todo.description} <br>
-                Due Date: ${due_date}
-              </p>
+            <div class="todo-container todo-done">
+              <div class="title">
+                Title:
+                <div class="content">
+                  ${todo.title}
+                </div>
+              </div>
+              <div class="title">
+                Description:
+                <div class="content">
+                  ${todo.description}
+                </div>
+              </div>
+              <div class="title">
+                Due Date:
+                <div class="content">
+                  ${due_date}
+                </div>
+              </div>
             </div>
             <div class="d-flex justify-content-end">
               <a onclick="deleteTodo(${todo.id})"><i class="fas fa-trash" style="color: rgb(255, 113, 113); cursor: pointer;"></i></a>
+              <a onclick="undoStatusTodo(${todo.id})"><i class="fas fa-undo-alt" style="color: #f5f7b2; cursor: pointer; margin-left: 10px;"></i></a>
             <div>
           </li>
         </ul>
@@ -256,18 +269,30 @@ const getTodos = () => {
         $('#todo-list').append(`
         <ul style="background: #fff; padding: 10px; border-radius: 10px; box-shadow: 0px 0px 10px 0px #bababa; list-style: none;">
           <li>
-            <div>
-              <small class="font-weight-bold">Todo ${todo.id}</small>
-              <p>
-                Title: ${todo.title} <br>
-                Description: ${todo.description} <br>
-                Due Date: ${due_date}
-              </p>
+            <div class="todo-container">
+              <div class="title">
+                Title:
+                <div class="content">
+                  ${todo.title}
+                </div>
+              </div>
+              <div class="title">
+                Description:
+                <div class="content">
+                  ${todo.description}
+                </div>
+              </div>
+              <div class="title">
+                Due Date:
+                <div class="content">
+                  ${due_date}
+                </div>
+              </div>
             </div>
             <div class="d-flex justify-content-end">
               <a onclick="deleteTodo(${todo.id})"><i class="fas fa-trash" style="color: rgb(255, 113, 113); cursor: pointer;"></i></a>
-              <a onclick="editStatusTodo(${todo.id})"><i class="fas fa-check" style="color: rgb(44, 196, 44); cursor: pointer; margin-left: 10px;"></i></a>
               <a onclick="editTodo(${todo.id})"><i class="fas fa-edit" style="color: rgb(98, 169, 255); cursor: pointer; margin-left: 10px;"></i></a>
+              <a onclick="editStatusTodo(${todo.id})"><i class="fas fa-check" style="color: rgb(44, 196, 44); cursor: pointer; margin-left: 10px;"></i></a>
             <div>
           </li>
         </ul>
@@ -301,7 +326,7 @@ const deleteTodo = (id) => {
     getTodos();
 
     Toastify({
-      text: `Todo ${id} deleted`,
+      text: `Todo was deleted`,
       gravity: "top",
       position: "left",
       backgroundColor: "#8db596",
@@ -338,7 +363,7 @@ const editStatusTodo = (id) => {
     getTodos();
 
     Toastify({
-      text: `Todo ${id} done`,
+      text: `Todo status done`,
       gravity: "top",
       position: "left",
       backgroundColor: "#8db596",
@@ -358,6 +383,43 @@ const editStatusTodo = (id) => {
     .showToast();
   })
   .always();
+};
+
+const undoStatusTodo = (id) => {
+  $.ajax({
+    method: 'PATCH',
+    url: `http://localhost:3000/todos/${id}`,
+    headers: {
+      access_token: localStorage.getItem('access_token')
+    },
+    data: {
+      status: 'todo'
+    }
+  })
+    .done((_) => {
+      getTodos();
+
+      Toastify({
+        text: `Undo todo status`,
+        gravity: "top",
+        position: "left",
+        backgroundColor: "#8db596",
+        duration: 3000
+      })
+        .showToast();
+    })
+    .fail(err => {
+      const { errors } = err.responseJSON;
+      Toastify({
+        text: errors.join(', '),
+        gravity: "top",
+        position: "left",
+        backgroundColor: "#ff7171",
+        duration: 3000
+      })
+        .showToast();
+    })
+    .always();
 };
 
 const editTodo = (id) => {
@@ -415,7 +477,7 @@ const edit = () => {
     $('#todos').show();
 
     Toastify({
-      text: `Todo ${id} edited`,
+      text: `Todo edited`,
       gravity: "top",
       position: "left",
       backgroundColor: "#8db596",
